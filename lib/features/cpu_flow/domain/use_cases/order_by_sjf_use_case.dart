@@ -26,13 +26,13 @@ class OrderBySjfUseCase {
         endTime: currentTime + processToRun.cpuTime,
       );
 
-      ProcessRuntime runtime = ProcessRuntime(
-        processId: processToRun.id,
-        remainingTime: 0,
-        waitingTime: slice.startTime - processToRun.arriveTime,
-        firstStartTime: slice.startTime,
-        finishTime: slice.endTime,
-      );
+      ProcessRuntime runtime = ProcessRuntime.fromProcess(processToRun)
+          .copyWith(
+            remainingTime: 0,
+            waitingTime: slice.startTime - processToRun.arriveTime,
+            firstStartTime: slice.startTime,
+            finishTime: slice.endTime,
+          );
 
       slices.add(slice);
       processRuntimes.add(runtime);

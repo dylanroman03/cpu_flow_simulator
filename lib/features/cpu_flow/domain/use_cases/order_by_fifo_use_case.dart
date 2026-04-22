@@ -19,8 +19,7 @@ class OrderByFifoUseCase {
         endTime: currentTime + process.cpuTime,
       );
 
-      ProcessRuntime runtime = ProcessRuntime(
-        processId: process.id,
+      ProcessRuntime runtime = ProcessRuntime.fromProcess(process).copyWith(
         remainingTime: 0,
         waitingTime: slice.startTime - process.arriveTime,
         firstStartTime: slice.startTime,
