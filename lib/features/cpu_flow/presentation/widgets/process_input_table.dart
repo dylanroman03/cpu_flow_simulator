@@ -2,6 +2,7 @@ import 'package:cpu_flow_simulator/core/validators/validators.dart';
 import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/process.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/presentation/tokens/custom_input_decoration.dart';
+import 'package:cpu_flow_simulator/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -99,6 +100,8 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.transparent,
@@ -110,9 +113,9 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Tabla de procesos',
+                  l10n.processTableTitle,
                   style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -125,7 +128,7 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
                 onPressed: _addRow,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: [const Icon(Icons.add), const Text('Agregar')],
+                  children: [const Icon(Icons.add), Text(l10n.addButton)],
                 ),
               ),
             ],
@@ -137,11 +140,11 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
               headingTextStyle: const TextStyle(fontWeight: FontWeight.w700),
               dataTextStyle: const TextStyle(fontWeight: FontWeight.w600),
               dividerThickness: 0.4,
-              columns: const [
-                DataColumn(label: Text('Proceso')),
-                DataColumn(label: Text('Llegada')),
-                DataColumn(label: Text('CPU (ms)')),
-                DataColumn(label: Text('')),
+              columns: [
+                DataColumn(label: Text(l10n.processColumn)),
+                DataColumn(label: Text(l10n.arrivalColumn)),
+                DataColumn(label: Text(l10n.cpuColumn)),
+                const DataColumn(label: Text('')),
               ],
               rows: [
                 for (int i = 0; i < _rows.length; i++)
@@ -197,7 +200,7 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
                               : () => _removeRow(i),
                           icon: const Icon(Icons.delete_outline),
                           color: AppTheme.deleteIcon,
-                          tooltip: 'Eliminar proceso',
+                          tooltip: l10n.removeProcessTooltip,
                         ),
                       ),
                     ],
@@ -207,14 +210,14 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
           ),
           const SizedBox(height: 8),
           if (_hasError)
-            const Text(
-              'Error: Asegúrate de que todos los campos sean válidos.',
-              style: TextStyle(color: AppTheme.inputError, fontSize: 12),
+            Text(
+              l10n.processTableError,
+              style: const TextStyle(color: AppTheme.inputError, fontSize: 12),
             )
           else
-            const Text(
-              'Nota: solo se toman filas con llegada >= 0 y CPU > 0.',
-              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            Text(
+              l10n.processTableNote,
+              style: const TextStyle(color: AppTheme.textMuted, fontSize: 12),
             ),
         ],
       ),

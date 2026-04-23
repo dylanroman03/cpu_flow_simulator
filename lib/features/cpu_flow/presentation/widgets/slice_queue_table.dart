@@ -2,6 +2,7 @@ import 'dart:ui' show PathMetric;
 
 import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/schedule_slice.dart';
+import 'package:cpu_flow_simulator/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class SliceQueueTable extends StatefulWidget {
@@ -79,6 +80,8 @@ class _SliceQueueTableState extends State<SliceQueueTable>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     final int totalTime = widget.slices.isEmpty
         ? 0
         : widget.slices
@@ -86,9 +89,9 @@ class _SliceQueueTableState extends State<SliceQueueTable>
               .reduce((a, b) => a > b ? a : b);
 
     if (totalTime == 0) {
-      return const Center(
+      return Center(
         child: Text(
-          'Sin ejecucion para mostrar',
+          l10n.queueEmpty,
           style: TextStyle(
             color: AppTheme.queueEmptyText,
             fontSize: 18,
@@ -107,18 +110,18 @@ class _SliceQueueTableState extends State<SliceQueueTable>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Cola de ejecucion',
-            style: TextStyle(
+          Text(
+            l10n.queueTitle,
+            style: const TextStyle(
               color: AppTheme.textPrimary,
               fontSize: 22,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Cada bloque representa 1 ms de CPU.',
-            style: TextStyle(
+          Text(
+            l10n.queueSubtitle,
+            style: const TextStyle(
               color: AppTheme.textMuted,
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -135,7 +138,7 @@ class _SliceQueueTableState extends State<SliceQueueTable>
                   for (int index = 0; index < cells.length; index++)
                     _AnimatedQueueCell(
                       progress: _cellProgress(index),
-                      child: _buildCell(cells[index]),
+                      child: _buildCell(cells[index], l10n),
                     ),
                 ],
               );
@@ -171,7 +174,7 @@ class _SliceQueueTableState extends State<SliceQueueTable>
     return Curves.easeOutCubic.transform(normalized.clamp(0.0, 1.0));
   }
 
-  Widget _buildCell(_CellData cell) {
+  Widget _buildCell(_CellData cell, AppLocalizations l10n) {
     final bool isNoneProcess = cell.processId == 'none';
     final Widget content = Container(
       alignment: Alignment.center,
@@ -194,7 +197,9 @@ class _SliceQueueTableState extends State<SliceQueueTable>
             ),
           ),
           Text(
-            cell.processId ?? 'Idle',
+            cell.processId == 'none'
+                ? l10n.idleLabel
+                : (cell.processId ?? l10n.idleLabel),
             style: const TextStyle(
               color: AppTheme.queueProcessText,
               fontSize: 11,

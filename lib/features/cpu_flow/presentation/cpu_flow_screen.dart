@@ -8,6 +8,7 @@ import 'package:cpu_flow_simulator/features/cpu_flow/domain/use_cases/order_by_r
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/use_cases/order_by_sjf_use_case.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/presentation/widgets/process_input_table.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/presentation/widgets/slice_queue_table.dart';
+import 'package:cpu_flow_simulator/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -91,6 +92,8 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -108,7 +111,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "CPU Flow Simulator - Cola de Ejecución",
+                  l10n.screenTitle,
                   style: TextStyle(
                     color: AppTheme.textPrimary,
                     fontSize: 26,
@@ -169,7 +172,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        'Procesos validos: ${processes.length}',
+                        l10n.processCount(processes.length),
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 15,
@@ -188,7 +191,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                         },
                       ),
                       Text(
-                        "Animaciones",
+                        l10n.animationLabel,
                         style: const TextStyle(
                           color: AppTheme.textSecondary,
                           fontSize: 15,
@@ -203,7 +206,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               const Icon(Icons.play_arrow),
-                              const Text('Ejecutar'),
+                              Text(l10n.runButton),
                             ],
                           ),
                         ),
@@ -329,7 +332,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
           fontWeight: FontWeight.w700,
         ),
         decoration: InputDecoration(
-          labelText: 'Q',
+          labelText: context.l10n.quantumLabel,
           isDense: true,
           filled: true,
           fillColor: Colors.white,
