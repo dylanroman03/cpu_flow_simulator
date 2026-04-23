@@ -1,3 +1,4 @@
+import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/schedule_slice.dart';
 import 'package:flutter/material.dart';
 
@@ -6,8 +7,8 @@ class SliceQueueTable extends StatelessWidget {
 
   final List<ScheduleSlice> slices;
 
-  static const double _cellMinWidth = 72;
-  static const double _cellHeight = 82;
+  static const double _cellMinWidth = 74;
+  static const double _cellHeight = 88;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,11 @@ class SliceQueueTable extends StatelessWidget {
       return const Center(
         child: Text(
           'Sin ejecucion para mostrar',
-          style: TextStyle(color: Colors.white70, fontSize: 18),
+          style: TextStyle(
+            color: AppTheme.queueEmptyText,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       );
     }
@@ -29,65 +34,71 @@ class SliceQueueTable extends StatelessWidget {
       return _CellData(time: time, processId: activeSlice?.processId);
     });
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final int columnsPerRow = (constraints.maxWidth / _cellMinWidth)
-            .floor()
-            .clamp(1, cells.length);
-        final int rows = (cells.length / columnsPerRow).ceil();
-
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Cola de ejecucion',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 12),
-              for (int row = 0; row < rows; row++)
-                _buildRow(
-                  cells.skip(row * columnsPerRow).take(columnsPerRow).toList(),
-                  columnsPerRow,
-                ),
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Cola de ejecucion',
+            style: TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        );
-      },
+          const SizedBox(height: 4),
+          const Text(
+            'Cada bloque representa 1 ms de CPU.',
+            style: TextStyle(
+              color: AppTheme.textMuted,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: cells.map(_buildCell).toList(growable: false),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildRow(List<_CellData> rowCells, int columnsPerRow) {
-    final int fillers = columnsPerRow - rowCells.length;
-
+  Widget _buildCell(_CellData cell) {
     return SizedBox(
+      width: _cellMinWidth,
       height: _cellHeight,
-      child: Row(
-        children: [
-          for (final cell in rowCells)
-            Expanded(
-              child: Container(
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: _colorForProcessId(cell.processId),
-                  border: Border.all(color: Colors.white38, width: 1),
-                ),
-                child: Text(
-                  '${cell.time}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
+      child: Container(
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: _colorForProcessId(cell.processId),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppTheme.queueCellBorder, width: 1),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '${cell.time}',
+              style: const TextStyle(
+                color: AppTheme.queueTimeText,
+                fontSize: 26,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          for (int i = 0; i < fillers; i++) const Expanded(child: SizedBox()),
-        ],
+            Text(
+              cell.processId ?? 'Idle',
+              style: const TextStyle(
+                color: AppTheme.queueProcessText,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.25,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -103,27 +114,9 @@ class SliceQueueTable extends StatelessWidget {
 
   Color _colorForProcessId(String? processId) {
     if (processId == null) {
-      return const Color(0xFF0B5261);
+      return AppTheme.queueIdleBackground;
     }
-
-    const palette = <Color>[
-      Color(0xFFFF9800),
-      Color(0xFFF5009B),
-      Color(0xFF1E88E5),
-      Color(0xFF8A00F4),
-      Color(0xFF4CAF50),
-      Color(0xFFE53935),
-      Color(0xFF00ACC1),
-      Color(0xFF6D4C41),
-      Color(0xFF3949AB),
-      Color(0xFF00897B),
-      Color(0xFF5D4037),
-    ];
-
-    final int index =
-        processId.codeUnits.fold<int>(0, (sum, char) => sum + char) %
-        palette.length;
-    return palette[index];
+    return AppTheme.queueProcessColorForId(processId);
   }
 }
 

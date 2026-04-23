@@ -1,4 +1,5 @@
 import 'package:cpu_flow_simulator/core/validators/validators.dart';
+import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/process.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/presentation/tokens/custom_input_decoration.dart';
 import 'package:flutter/material.dart';
@@ -86,11 +87,10 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF014452),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white24),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -100,16 +100,19 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
                 child: Text(
                   'Tabla de procesos',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontWeight: FontWeight.w700,
-                    fontSize: 20,
+                    fontSize: 24,
+                    letterSpacing: 0.1,
                   ),
                 ),
               ),
-              ElevatedButton.icon(
+              ElevatedButton(
                 onPressed: _addRow,
-                icon: const Icon(Icons.add),
-                label: const Text('Agregar'),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [const Icon(Icons.add), const Text('Agregar')],
+                ),
               ),
             ],
           ),
@@ -118,10 +121,20 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
             scrollDirection: Axis.horizontal,
             child: DataTable(
               headingTextStyle: const TextStyle(
-                color: Colors.white,
+                color: AppTheme.textHeadingMuted,
                 fontWeight: FontWeight.w700,
               ),
-              dataTextStyle: const TextStyle(color: Colors.white),
+              dataTextStyle: const TextStyle(
+                color: AppTheme.textBodyStrong,
+                fontWeight: FontWeight.w600,
+              ),
+              dividerThickness: 0.4,
+              headingRowColor: WidgetStateProperty.all(
+                AppTheme.tableHeadingBackground,
+              ),
+              dataRowColor: WidgetStateProperty.all(
+                AppTheme.tableRowBackground,
+              ),
               columns: const [
                 DataColumn(label: Text('Proceso')),
                 DataColumn(label: Text('Llegada')),
@@ -147,7 +160,7 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
                               _notifyChanged();
                             },
                             decoration: customInputDecoration(
-                              !Validators.isArrivalValidText(
+                              hasError: !Validators.isArrivalValidText(
                                 _rows[i].arriveTimeController.text,
                               ),
                             ),
@@ -168,7 +181,7 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
                               _notifyChanged();
                             },
                             decoration: customInputDecoration(
-                              !Validators.isCpuValidText(
+                              hasError: !Validators.isCpuValidText(
                                 _rows[i].cpuTimeController.text,
                               ),
                             ),
@@ -181,7 +194,7 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
                               ? null
                               : () => _removeRow(i),
                           icon: const Icon(Icons.delete_outline),
-                          color: Colors.white,
+                          color: AppTheme.deleteIcon,
                           tooltip: 'Eliminar proceso',
                         ),
                       ),
@@ -193,7 +206,7 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
           const SizedBox(height: 8),
           const Text(
             'Nota: solo se toman filas con llegada >= 0 y CPU > 0.',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
           ),
         ],
       ),

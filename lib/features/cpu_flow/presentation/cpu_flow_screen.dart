@@ -1,3 +1,6 @@
+import 'dart:developer';
+
+import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/process.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/schedule_slice.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/use_cases/order_by_fifo_use_case.dart';
@@ -38,18 +41,33 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF003743),
-      appBar: AppBar(
-        title: const Text('CPU Flow - Cola de Ejecucion'),
-        backgroundColor: const Color(0xFF138CE8),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: 5,
+      appBar: AppBar(title: const Text('CPU Flow - Cola de Ejecucion')),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppTheme.gradientStart, AppTheme.gradientEnd],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final bool isWide = constraints.maxWidth >= 1020;
+
+            final inputPanel = Container(
+              decoration: BoxDecoration(
+                color: AppTheme.cardBackground,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.cardBorder),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppTheme.softShadow,
+                    blurRadius: 16,
+                    offset: Offset(0, 7),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(16),
               child: SingleChildScrollView(
                 child: ProcessInputTable(
                   initialValues: processes,
@@ -60,45 +78,86 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                   },
                 ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 7,
+            );
+
+            final queuePanel = Container(
+              decoration: BoxDecoration(
+                color: AppTheme.cardBackground,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppTheme.cardBorder),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppTheme.softShadow,
+                    blurRadius: 16,
+                    offset: Offset(0, 7),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      Expanded(
-                        child: Text(
-                          'Procesos validos: ${processes.length}',
-                          style: const TextStyle(
-                            color: Colors.white70,
-                            fontSize: 14,
-                          ),
+                      Text(
+                        'Procesos validos: ${processes.length}',
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(width: 8),
                       _buildAlgorithmSelector(),
-                      const SizedBox(width: 8),
                       if (_selectedAlgorithm == _SchedulingAlgorithm.roundRobin)
                         _buildQuantumInput(),
-                      const SizedBox(width: 8),
-                      FilledButton.icon(
+                      ElevatedButton(
                         onPressed: _runSimulation,
-                        icon: const Icon(Icons.play_arrow),
-                        label: const Text('Ejecutar'),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.play_arrow),
+                            const Text('Ejecutar'),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  const Divider(color: Colors.white24, height: 1),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
+                  const Divider(color: AppTheme.divider, height: 1),
+                  const SizedBox(height: 14),
                   Expanded(child: SliceQueueTable(slices: slices)),
                 ],
               ),
-            ),
-          ],
+            );
+
+            if (isWide) {
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(flex: 5, child: inputPanel),
+                    const SizedBox(width: 18),
+                    Expanded(flex: 7, child: queuePanel),
+                  ],
+                ),
+              );
+            }
+
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Expanded(flex: 7, child: inputPanel),
+                  const SizedBox(height: 14),
+                  Expanded(flex: 8, child: queuePanel),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
@@ -106,13 +165,21 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
 
   Widget _buildAlgorithmSelector() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.selectorBorder),
       ),
       child: DropdownButton<_SchedulingAlgorithm>(
         value: _selectedAlgorithm,
+        borderRadius: BorderRadius.circular(12),
+        style: const TextStyle(
+          color: AppTheme.textPrimary,
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+        ),
+        iconEnabledColor: AppTheme.selectorIcon,
         underline: const SizedBox.shrink(),
         onChanged: (value) {
           if (value == null) {
@@ -139,17 +206,35 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
 
   Widget _buildQuantumInput() {
     return SizedBox(
-      width: 90,
+      width: 92,
       child: TextField(
         controller: _quantumController,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-        decoration: const InputDecoration(
+        style: const TextStyle(
+          color: AppTheme.textPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+        decoration: InputDecoration(
           labelText: 'Q',
           isDense: true,
           filled: true,
           fillColor: Colors.white,
-          border: OutlineInputBorder(),
+          labelStyle: const TextStyle(
+            color: AppTheme.quantumLabel,
+            fontWeight: FontWeight.w700,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppTheme.selectorBorder),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(
+              color: AppTheme.primaryButton,
+              width: 1.5,
+            ),
+          ),
         ),
       ),
     );
@@ -192,6 +277,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
           break;
       }
     } catch (_) {
+      log("error _");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('No se pudo ejecutar la simulacion con estos datos.'),

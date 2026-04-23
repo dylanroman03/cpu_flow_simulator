@@ -1,3 +1,4 @@
+import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/presentation/cpu_flow_screen.dart';
 
@@ -13,10 +14,8 @@ class CpuFlowApp extends StatelessWidget {
     return MaterialApp(
       title: 'CPU Flow Simulator',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-      ),
-      home: CpuFlowScreen(),
+      theme: AppTheme.lightTheme,
+      home: const CpuFlowScreen(),
     );
   }
 }
