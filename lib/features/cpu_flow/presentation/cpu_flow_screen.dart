@@ -95,6 +95,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
     final l10n = context.l10n;
 
     return Scaffold(
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -106,21 +107,6 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final bool isWide = constraints.maxWidth >= 1020;
-
-            final title = Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  l10n.screenTitle,
-                  style: TextStyle(
-                    color: AppTheme.textPrimary,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ],
-            );
 
             final inputPanel = Container(
               decoration: BoxDecoration(
@@ -227,29 +213,16 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
             );
 
             if (isWide) {
-              return Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: title,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      left: 20,
-                      right: 20,
-                      top: 60,
-                      bottom: 20,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(flex: 5, child: inputPanel),
-                        const SizedBox(width: 18),
-                        Expanded(flex: 7, child: queuePanel),
-                      ],
-                    ),
-                  ),
-                ],
+              return Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(flex: 5, child: inputPanel),
+                    const SizedBox(width: 18),
+                    Expanded(flex: 7, child: queuePanel),
+                  ],
+                ),
               );
             }
 
@@ -257,7 +230,6 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  title,
                   Expanded(flex: 7, child: inputPanel),
                   const SizedBox(height: 14),
                   Expanded(flex: 8, child: queuePanel),
