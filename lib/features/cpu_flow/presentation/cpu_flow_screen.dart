@@ -21,6 +21,8 @@ class CpuFlowScreen extends StatefulWidget {
 }
 
 class _CpuFlowScreenState extends State<CpuFlowScreen> {
+  static const double _controlHeight = 35;
+
   List<Process> processes = <Process>[];
   List<ScheduleSlice> slices = <ScheduleSlice>[];
 
@@ -31,6 +33,52 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
     text: '3',
   );
   _SchedulingAlgorithm _selectedAlgorithm = _SchedulingAlgorithm.roundRobin;
+
+  void _runSimulation() {
+    if (processes.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Agrega al menos un proceso valido.')),
+      );
+      return;
+    }
+
+    try {
+      switch (_selectedAlgorithm) {
+        case _SchedulingAlgorithm.fifo:
+          final result = _fifoUseCase.call(processes);
+          setState(() {
+            slices = result.slices;
+          });
+          break;
+        case _SchedulingAlgorithm.sjf:
+          final result = _sjfUseCase.call(processes);
+          setState(() {
+            slices = result.slices;
+          });
+          break;
+        case _SchedulingAlgorithm.roundRobin:
+          final int quantum = int.tryParse(_quantumController.text) ?? 0;
+          if (quantum <= 0) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('El quantum debe ser mayor a 0.')),
+            );
+            return;
+          }
+          final result = _roundRobinUseCase.call(processes, quantum);
+          setState(() {
+            slices = result.slices;
+          });
+          break;
+      }
+    } catch (_) {
+      log("error _");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo ejecutar la simulacion con estos datos.'),
+        ),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -113,14 +161,17 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                       _buildAlgorithmSelector(),
                       if (_selectedAlgorithm == _SchedulingAlgorithm.roundRobin)
                         _buildQuantumInput(),
-                      ElevatedButton(
-                        onPressed: _runSimulation,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(Icons.play_arrow),
-                            const Text('Ejecutar'),
-                          ],
+                      Container(
+                        height: _controlHeight - 2,
+                        child: ElevatedButton(
+                          onPressed: _runSimulation,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.play_arrow),
+                              const Text('Ejecutar'),
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -164,55 +215,64 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
   }
 
   Widget _buildAlgorithmSelector() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.selectorBorder),
-      ),
-      child: DropdownButton<_SchedulingAlgorithm>(
-        value: _selectedAlgorithm,
-        borderRadius: BorderRadius.circular(12),
-        style: const TextStyle(
-          color: AppTheme.textPrimary,
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
+    return SizedBox(
+      height: _controlHeight,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.roundedCornerRadius),
+          border: Border.all(color: AppTheme.selectorBorder),
         ),
-        iconEnabledColor: AppTheme.selectorIcon,
-        underline: const SizedBox.shrink(),
-        onChanged: (value) {
-          if (value == null) {
-            return;
-          }
-          setState(() {
-            _selectedAlgorithm = value;
-          });
-        },
-        items: const [
-          DropdownMenuItem(
-            value: _SchedulingAlgorithm.fifo,
-            child: Text('FIFO'),
+        child: DropdownButton<_SchedulingAlgorithm>(
+          value: _selectedAlgorithm,
+          borderRadius: BorderRadius.circular(AppTheme.roundedCornerRadius),
+          style: const TextStyle(
+            color: AppTheme.textPrimary,
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
           ),
-          DropdownMenuItem(value: _SchedulingAlgorithm.sjf, child: Text('SJF')),
-          DropdownMenuItem(
-            value: _SchedulingAlgorithm.roundRobin,
-            child: Text('Round Robin'),
-          ),
-        ],
+          iconEnabledColor: AppTheme.selectorIcon,
+          underline: const SizedBox.shrink(),
+          onChanged: (value) {
+            if (value == null) {
+              return;
+            }
+            setState(() {
+              _selectedAlgorithm = value;
+            });
+          },
+          items: const [
+            DropdownMenuItem(
+              value: _SchedulingAlgorithm.fifo,
+              child: Text('FIFO'),
+            ),
+            DropdownMenuItem(
+              value: _SchedulingAlgorithm.sjf,
+              child: Text('SJF'),
+            ),
+            DropdownMenuItem(
+              value: _SchedulingAlgorithm.roundRobin,
+              child: Text('Round Robin'),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildQuantumInput() {
     return SizedBox(
-      width: 92,
+      width: 130,
+      height: _controlHeight,
       child: TextField(
         controller: _quantumController,
         keyboardType: TextInputType.number,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        textAlignVertical: TextAlignVertical.center,
         style: const TextStyle(
           color: AppTheme.textPrimary,
+          fontSize: 15,
           fontWeight: FontWeight.w700,
         ),
         decoration: InputDecoration(
@@ -225,11 +285,11 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
             fontWeight: FontWeight.w700,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppTheme.roundedCornerRadius),
             borderSide: const BorderSide(color: AppTheme.selectorBorder),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppTheme.roundedCornerRadius),
             borderSide: const BorderSide(
               color: AppTheme.primaryButton,
               width: 1.5,
@@ -238,51 +298,5 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
         ),
       ),
     );
-  }
-
-  void _runSimulation() {
-    if (processes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Agrega al menos un proceso valido.')),
-      );
-      return;
-    }
-
-    try {
-      switch (_selectedAlgorithm) {
-        case _SchedulingAlgorithm.fifo:
-          final result = _fifoUseCase.call(processes);
-          setState(() {
-            slices = result.slices;
-          });
-          break;
-        case _SchedulingAlgorithm.sjf:
-          final result = _sjfUseCase.call(processes);
-          setState(() {
-            slices = result.slices;
-          });
-          break;
-        case _SchedulingAlgorithm.roundRobin:
-          final int quantum = int.tryParse(_quantumController.text) ?? 0;
-          if (quantum <= 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('El quantum debe ser mayor a 0.')),
-            );
-            return;
-          }
-          final result = _roundRobinUseCase.call(processes, quantum);
-          setState(() {
-            slices = result.slices;
-          });
-          break;
-      }
-    } catch (_) {
-      log("error _");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo ejecutar la simulacion con estos datos.'),
-        ),
-      );
-    }
   }
 }

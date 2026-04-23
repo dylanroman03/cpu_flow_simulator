@@ -120,21 +120,9 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
-              headingTextStyle: const TextStyle(
-                color: AppTheme.textHeadingMuted,
-                fontWeight: FontWeight.w700,
-              ),
-              dataTextStyle: const TextStyle(
-                color: AppTheme.textBodyStrong,
-                fontWeight: FontWeight.w600,
-              ),
+              headingTextStyle: const TextStyle(fontWeight: FontWeight.w700),
+              dataTextStyle: const TextStyle(fontWeight: FontWeight.w600),
               dividerThickness: 0.4,
-              headingRowColor: WidgetStateProperty.all(
-                AppTheme.tableHeadingBackground,
-              ),
-              dataRowColor: WidgetStateProperty.all(
-                AppTheme.tableRowBackground,
-              ),
               columns: const [
                 DataColumn(label: Text('Proceso')),
                 DataColumn(label: Text('Llegada')),

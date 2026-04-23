@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 class AppTheme {
   const AppTheme._();
 
+  static const double roundedCornerRadius = 12.0;
+
   static const double _goldenAngle = 137.50776405003785;
 
   static const Color seed = Color(0xFFC66A2B);
@@ -116,7 +118,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(AppTheme.roundedCornerRadius),
           ),
         ),
       ),
