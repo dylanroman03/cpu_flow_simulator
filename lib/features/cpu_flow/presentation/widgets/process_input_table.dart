@@ -1,0 +1,245 @@
+import 'package:cpu_flow_simulator/core/validators/validators.dart';
+import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/process.dart';
+import 'package:cpu_flow_simulator/features/cpu_flow/presentation/tokens/custom_input_decoration.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+class ProcessInputTable extends StatefulWidget {
+  const ProcessInputTable({
+    super.key,
+    this.onChanged,
+    this.initialValues = const <Process>[],
+  });
+
+  final ValueChanged<List<Process>>? onChanged;
+  final List<Process> initialValues;
+
+  @override
+  State<ProcessInputTable> createState() => _ProcessInputTableState();
+}
+
+class _ProcessInputTableState extends State<ProcessInputTable> {
+  final List<_ProcessRowDraft> _rows = <_ProcessRowDraft>[];
+
+  @override
+  void initState() {
+    super.initState();
+
+    for (final process in widget.initialValues) {
+      _rows.add(
+        _ProcessRowDraft(
+          arriveTime: process.arriveTime.toString(),
+          cpuTime: process.cpuTime.toString(),
+        ),
+      );
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _notifyChanged());
+  }
+
+  void _addRow() {
+    setState(() {
+      _rows.add(_ProcessRowDraft(arriveTime: '0', cpuTime: '1'));
+    });
+    _notifyChanged();
+  }
+
+  void _removeRow(int index) {
+    setState(() {
+      final row = _rows.removeAt(index);
+      row.dispose();
+    });
+    _notifyChanged();
+  }
+
+  void _notifyChanged() {
+    final List<Process> validProcesses = <Process>[];
+
+    for (int i = 0; i < _rows.length; i++) {
+      final int? arriveTime = int.tryParse(_rows[i].arriveTimeController.text);
+      final int? cpuTime = int.tryParse(_rows[i].cpuTimeController.text);
+
+      if (arriveTime == null || cpuTime == null) {
+        continue;
+      }
+      if (arriveTime < 0 || cpuTime <= 0) {
+        continue;
+      }
+
+      validProcesses.add(
+        Process(id: 'P${i + 1}', arriveTime: arriveTime, cpuTime: cpuTime),
+      );
+    }
+
+    widget.onChanged?.call(validProcesses);
+  }
+
+  @override
+  void dispose() {
+    for (final row in _rows) {
+      row.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF014452),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white24),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Tabla de procesos',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 20,
+                  ),
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _addRow,
+                icon: const Icon(Icons.add),
+                label: const Text('Agregar'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              headingTextStyle: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+              dataTextStyle: const TextStyle(color: Colors.white),
+              columns: const [
+                DataColumn(label: Text('Proceso')),
+                DataColumn(label: Text('Llegada')),
+                DataColumn(label: Text('CPU (ms)')),
+                DataColumn(label: Text('')),
+              ],
+              rows: [
+                for (int i = 0; i < _rows.length; i++)
+                  DataRow(
+                    cells: [
+                      DataCell(Text('P${i + 1}')),
+                      DataCell(
+                        SizedBox(
+                          width: 110,
+                          child: TextField(
+                            controller: _rows[i].arriveTimeController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: const [
+                              _MinIntInputFormatter(minValue: 0),
+                            ],
+                            onChanged: (_) {
+                              setState(() {});
+                              _notifyChanged();
+                            },
+                            decoration: customInputDecoration(
+                              !Validators.isArrivalValidText(
+                                _rows[i].arriveTimeController.text,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        SizedBox(
+                          width: 110,
+                          child: TextField(
+                            controller: _rows[i].cpuTimeController,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: const [
+                              _MinIntInputFormatter(minValue: 1),
+                            ],
+                            onChanged: (_) {
+                              setState(() {});
+                              _notifyChanged();
+                            },
+                            decoration: customInputDecoration(
+                              !Validators.isCpuValidText(
+                                _rows[i].cpuTimeController.text,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        IconButton(
+                          onPressed: _rows.length == 1
+                              ? null
+                              : () => _removeRow(i),
+                          icon: const Icon(Icons.delete_outline),
+                          color: Colors.white,
+                          tooltip: 'Eliminar proceso',
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Nota: solo se toman filas con llegada >= 0 y CPU > 0.',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProcessRowDraft {
+  _ProcessRowDraft({required String arriveTime, required String cpuTime})
+    : arriveTimeController = TextEditingController(text: arriveTime),
+      cpuTimeController = TextEditingController(text: cpuTime);
+
+  final TextEditingController arriveTimeController;
+  final TextEditingController cpuTimeController;
+
+  void dispose() {
+    arriveTimeController.dispose();
+    cpuTimeController.dispose();
+  }
+}
+
+class _MinIntInputFormatter extends TextInputFormatter {
+  const _MinIntInputFormatter({required this.minValue});
+
+  final int minValue;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final String text = newValue.text;
+
+    if (text.isEmpty) {
+      return newValue;
+    }
+
+    if (!RegExp(r'^\d+$').hasMatch(text)) {
+      return oldValue;
+    }
+
+    final int? value = int.tryParse(text);
+    if (value == null || value < minValue) {
+      return oldValue;
+    }
+
+    return newValue;
+  }
+}
