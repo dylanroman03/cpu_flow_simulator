@@ -5,6 +5,13 @@ import 'package:cpu_flow_simulator/features/cpu_flow/presentation/tokens/custom_
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+class ProcessResponse {
+  ProcessResponse({required this.processes, required this.hasError});
+
+  final List<Process> processes;
+  final bool hasError;
+}
+
 class ProcessInputTable extends StatefulWidget {
   const ProcessInputTable({
     super.key,
@@ -12,7 +19,7 @@ class ProcessInputTable extends StatefulWidget {
     this.initialValues = const <Process>[],
   });
 
-  final ValueChanged<List<Process>>? onChanged;
+  final ValueChanged<ProcessResponse>? onChanged;
   final List<Process> initialValues;
 
   @override
@@ -21,6 +28,7 @@ class ProcessInputTable extends StatefulWidget {
 
 class _ProcessInputTableState extends State<ProcessInputTable> {
   final List<_ProcessRowDraft> _rows = <_ProcessRowDraft>[];
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -72,7 +80,13 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
       );
     }
 
-    widget.onChanged?.call(validProcesses);
+    setState(() {
+      _hasError = validProcesses.length != _rows.length;
+    });
+
+    widget.onChanged?.call(
+      ProcessResponse(processes: validProcesses, hasError: _hasError),
+    );
   }
 
   @override
@@ -192,10 +206,16 @@ class _ProcessInputTableState extends State<ProcessInputTable> {
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Nota: solo se toman filas con llegada >= 0 y CPU > 0.',
-            style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
-          ),
+          if (_hasError)
+            const Text(
+              'Error: Asegúrate de que todos los campos sean válidos.',
+              style: TextStyle(color: AppTheme.inputError, fontSize: 12),
+            )
+          else
+            const Text(
+              'Nota: solo se toman filas con llegada >= 0 y CPU > 0.',
+              style: TextStyle(color: AppTheme.textMuted, fontSize: 12),
+            ),
         ],
       ),
     );

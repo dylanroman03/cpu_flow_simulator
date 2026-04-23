@@ -23,6 +23,8 @@ class CpuFlowScreen extends StatefulWidget {
 class _CpuFlowScreenState extends State<CpuFlowScreen> {
   static const double _controlHeight = 35;
 
+  bool enabledRun = false;
+
   List<Process> processes = <Process>[];
   List<ScheduleSlice> slices = <ScheduleSlice>[];
 
@@ -121,7 +123,8 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                   initialValues: processes,
                   onChanged: (value) {
                     setState(() {
-                      processes = value;
+                      processes = value.processes;
+                      enabledRun = !value.hasError && processes.isNotEmpty;
                     });
                   },
                 ),
@@ -161,10 +164,10 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                       _buildAlgorithmSelector(),
                       if (_selectedAlgorithm == _SchedulingAlgorithm.roundRobin)
                         _buildQuantumInput(),
-                      Container(
+                      SizedBox(
                         height: _controlHeight - 2,
                         child: ElevatedButton(
-                          onPressed: _runSimulation,
+                          onPressed: enabledRun ? _runSimulation : null,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
