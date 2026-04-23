@@ -24,6 +24,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
   static const double _controlHeight = 35;
 
   bool enabledRun = false;
+  bool showAnimations = true;
 
   List<Process> processes = <Process>[];
   List<ScheduleSlice> slices = <ScheduleSlice>[];
@@ -164,6 +165,22 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                       _buildAlgorithmSelector(),
                       if (_selectedAlgorithm == _SchedulingAlgorithm.roundRobin)
                         _buildQuantumInput(),
+                      Switch(
+                        value: showAnimations,
+                        onChanged: (value) {
+                          setState(() {
+                            showAnimations = value;
+                          });
+                        },
+                      ),
+                      Text(
+                        "Animaciones",
+                        style: const TextStyle(
+                          color: AppTheme.textSecondary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                       SizedBox(
                         height: _controlHeight - 2,
                         child: ElevatedButton(
@@ -182,7 +199,12 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                   const SizedBox(height: 14),
                   const Divider(color: AppTheme.divider, height: 1),
                   const SizedBox(height: 14),
-                  Expanded(child: SliceQueueTable(slices: slices)),
+                  Expanded(
+                    child: SliceQueueTable(
+                      slices: slices,
+                      showAnimations: showAnimations,
+                    ),
+                  ),
                 ],
               ),
             );
