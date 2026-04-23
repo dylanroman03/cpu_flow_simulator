@@ -30,6 +30,26 @@ class OrderByRoundRobinUseCase {
     updatePending(pending, availableProcesses);
 
     while (pending.isNotEmpty || readyQueue.isNotEmpty) {
+      if (readyQueue.isEmpty) {
+        final int nextArriveTime = pending
+            .map((process) => process.arriveTime)
+            .reduce((a, b) => a < b ? a : b);
+
+        slices.add(
+          ScheduleSlice(
+            processId: 'none',
+            startTime: currentTime,
+            endTime: nextArriveTime,
+          ),
+        );
+        currentTime = nextArriveTime;
+
+        availableProcesses = availableProcess(pending, currentTime);
+        updateQueue(readyQueue, availableProcesses);
+        updatePending(pending, availableProcesses);
+        continue;
+      }
+
       final processToRun = readyQueue.removeFirst();
       int timeIn = min(quantum, processToRun.remainingTime);
 

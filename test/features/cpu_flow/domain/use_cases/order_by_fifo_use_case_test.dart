@@ -37,5 +37,37 @@ void main() {
       expect(result.totalTime, 14);
       expect(result.averageWaitingTime, closeTo(2.75, 0.0001));
     });
+
+    test('genera slices none cuando hay huecos sin procesos', () {
+      final useCase = OrderByFifoUseCase();
+
+      final processes = <Process>[
+        const Process(id: 'P1', arriveTime: 3, cpuTime: 2),
+        const Process(id: 'P2', arriveTime: 8, cpuTime: 1),
+      ];
+
+      final result = useCase.call(processes);
+
+      expect(result.slices.length, 4);
+
+      expect(result.slices[0].processId, 'none');
+      expect(result.slices[0].startTime, 0);
+      expect(result.slices[0].endTime, 3);
+
+      expect(result.slices[1].processId, 'P1');
+      expect(result.slices[1].startTime, 3);
+      expect(result.slices[1].endTime, 5);
+
+      expect(result.slices[2].processId, 'none');
+      expect(result.slices[2].startTime, 5);
+      expect(result.slices[2].endTime, 8);
+
+      expect(result.slices[3].processId, 'P2');
+      expect(result.slices[3].startTime, 8);
+      expect(result.slices[3].endTime, 9);
+
+      expect(result.totalTime, 9);
+      expect(result.averageWaitingTime, closeTo(0.0, 0.0001));
+    });
   });
 }

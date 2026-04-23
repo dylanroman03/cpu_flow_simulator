@@ -54,5 +54,42 @@ void main() {
       expect(result.totalTime, 16);
       expect(result.averageWaitingTime, closeTo(7.0, 0.0001));
     });
+
+    test('genera slices none cuando hay huecos sin procesos en cola', () {
+      final useCase = OrderByRoundRobinUseCase();
+      const quantum = 2;
+
+      final processes = <Process>[
+        const Process(id: 'P1', arriveTime: 3, cpuTime: 3),
+        const Process(id: 'P2', arriveTime: 10, cpuTime: 2),
+      ];
+
+      final result = useCase.call(processes, quantum);
+
+      expect(result.slices.length, 5);
+
+      expect(result.slices[0].processId, 'none');
+      expect(result.slices[0].startTime, 0);
+      expect(result.slices[0].endTime, 3);
+
+      expect(result.slices[1].processId, 'P1');
+      expect(result.slices[1].startTime, 3);
+      expect(result.slices[1].endTime, 5);
+
+      expect(result.slices[2].processId, 'P1');
+      expect(result.slices[2].startTime, 5);
+      expect(result.slices[2].endTime, 6);
+
+      expect(result.slices[3].processId, 'none');
+      expect(result.slices[3].startTime, 6);
+      expect(result.slices[3].endTime, 10);
+
+      expect(result.slices[4].processId, 'P2');
+      expect(result.slices[4].startTime, 10);
+      expect(result.slices[4].endTime, 12);
+
+      expect(result.totalTime, 12);
+      expect(result.averageWaitingTime, closeTo(0.0, 0.0001));
+    });
   });
 }

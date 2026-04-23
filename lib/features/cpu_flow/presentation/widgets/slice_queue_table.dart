@@ -1,3 +1,5 @@
+import 'dart:ui' show PathMetric;
+
 import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/schedule_slice.dart';
 import 'package:flutter/material.dart';
@@ -170,39 +172,44 @@ class _SliceQueueTableState extends State<SliceQueueTable>
   }
 
   Widget _buildCell(_CellData cell) {
+    final bool isNoneProcess = cell.processId == 'none';
+    final Widget content = Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: _colorForProcessId(cell.processId),
+        borderRadius: BorderRadius.circular(12),
+        border: isNoneProcess
+            ? null
+            : Border.all(color: AppTheme.queueCellBorder, width: 1),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            '${cell.time}',
+            style: const TextStyle(
+              color: AppTheme.queueTimeText,
+              fontSize: 26,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Text(
+            cell.processId ?? 'Idle',
+            style: const TextStyle(
+              color: AppTheme.queueProcessText,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.25,
+            ),
+          ),
+        ],
+      ),
+    );
+
     return SizedBox(
       width: _cellMinWidth,
       height: _cellHeight,
-      child: Container(
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: _colorForProcessId(cell.processId),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppTheme.queueCellBorder, width: 1),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              '${cell.time}',
-              style: const TextStyle(
-                color: AppTheme.queueTimeText,
-                fontSize: 26,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              cell.processId ?? 'Idle',
-              style: const TextStyle(
-                color: AppTheme.queueProcessText,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.25,
-              ),
-            ),
-          ],
-        ),
-      ),
+      child: isNoneProcess ? _DashedCellBorder(child: content) : content,
     );
   }
 
@@ -216,8 +223,8 @@ class _SliceQueueTableState extends State<SliceQueueTable>
   }
 
   Color _colorForProcessId(String? processId) {
-    if (processId == null) {
-      return AppTheme.queueIdleBackground;
+    if (processId == null || processId == 'none') {
+      return Colors.white;
     }
     return AppTheme.queueProcessColorForId(processId);
   }
@@ -238,6 +245,84 @@ class _AnimatedQueueCell extends StatelessWidget {
         child: child,
       ),
     );
+  }
+}
+
+class _DashedCellBorder extends StatelessWidget {
+  const _DashedCellBorder({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _DashedRoundedBorderPainter(
+        color: AppTheme.queueCellBorder,
+        radius: 12,
+        strokeWidth: 1,
+        dashLength: 6,
+        gapLength: 4,
+      ),
+      child: child,
+    );
+  }
+}
+
+class _DashedRoundedBorderPainter extends CustomPainter {
+  const _DashedRoundedBorderPainter({
+    required this.color,
+    required this.radius,
+    required this.strokeWidth,
+    required this.dashLength,
+    required this.gapLength,
+  });
+
+  final Color color;
+  final double radius;
+  final double strokeWidth;
+  final double dashLength;
+  final double gapLength;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    final RRect rrect = RRect.fromRectAndRadius(
+      Offset.zero & size,
+      Radius.circular(radius),
+    );
+
+    final Path dashedPath = _buildDashedPath(Path()..addRRect(rrect));
+    canvas.drawPath(dashedPath, paint);
+  }
+
+  Path _buildDashedPath(Path source) {
+    final Path dashedPath = Path();
+
+    for (final PathMetric metric in source.computeMetrics()) {
+      double distance = 0;
+      while (distance < metric.length) {
+        final double next = (distance + dashLength)
+            .clamp(0, metric.length)
+            .toDouble();
+        dashedPath.addPath(metric.extractPath(distance, next), Offset.zero);
+        distance += dashLength + gapLength;
+      }
+    }
+
+    return dashedPath;
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedRoundedBorderPainter oldDelegate) {
+    return color != oldDelegate.color ||
+        radius != oldDelegate.radius ||
+        strokeWidth != oldDelegate.strokeWidth ||
+        dashLength != oldDelegate.dashLength ||
+        gapLength != oldDelegate.gapLength;
   }
 }
 

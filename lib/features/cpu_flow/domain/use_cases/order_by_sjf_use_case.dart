@@ -17,6 +17,22 @@ class OrderBySjfUseCase {
           .where((p) => p.arriveTime <= currentTime)
           .toList();
 
+      if (availableProcesses.isEmpty) {
+        final int nextArriveTime = sortedProcess
+            .map((p) => p.arriveTime)
+            .reduce((a, b) => a < b ? a : b);
+
+        slices.add(
+          ScheduleSlice(
+            processId: 'none',
+            startTime: currentTime,
+            endTime: nextArriveTime,
+          ),
+        );
+        currentTime = nextArriveTime;
+        continue;
+      }
+
       availableProcesses.sort((a, b) => a.cpuTime.compareTo(b.cpuTime));
       final processToRun = availableProcesses.first;
 

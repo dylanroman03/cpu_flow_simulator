@@ -13,6 +13,17 @@ class OrderByFifoUseCase {
     int currentTime = 0;
 
     for (var process in sortedProcess) {
+      if (process.arriveTime > currentTime) {
+        slices.add(
+          ScheduleSlice(
+            processId: 'none',
+            startTime: currentTime,
+            endTime: process.arriveTime,
+          ),
+        );
+        currentTime = process.arriveTime;
+      }
+
       ScheduleSlice slice = ScheduleSlice(
         processId: process.id,
         startTime: currentTime,
