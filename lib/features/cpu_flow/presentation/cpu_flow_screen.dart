@@ -92,7 +92,6 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('CPU Flow - Cola de Ejecucion')),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -104,6 +103,16 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final bool isWide = constraints.maxWidth >= 1020;
+
+            final title = Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "CPU Flow Simulator - Cola de Ejecución",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ],
+            );
 
             final inputPanel = Container(
               decoration: BoxDecoration(
@@ -210,16 +219,29 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
             );
 
             if (isWide) {
-              return Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(flex: 5, child: inputPanel),
-                    const SizedBox(width: 18),
-                    Expanded(flex: 7, child: queuePanel),
-                  ],
-                ),
+              return Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: title,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 60,
+                      bottom: 20,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(flex: 5, child: inputPanel),
+                        const SizedBox(width: 18),
+                        Expanded(flex: 7, child: queuePanel),
+                      ],
+                    ),
+                  ),
+                ],
               );
             }
 
@@ -227,6 +249,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
+                  title,
                   Expanded(flex: 7, child: inputPanel),
                   const SizedBox(height: 14),
                   Expanded(flex: 8, child: queuePanel),
