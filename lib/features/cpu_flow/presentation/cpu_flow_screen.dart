@@ -109,7 +109,12 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
               children: [
                 Text(
                   "CPU Flow Simulator - Cola de Ejecución",
-                  style: Theme.of(context).textTheme.headlineMedium,
+                  style: TextStyle(
+                    color: AppTheme.textPrimary,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.2,
+                  ),
                 ),
               ],
             );
