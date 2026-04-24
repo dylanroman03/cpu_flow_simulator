@@ -62,6 +62,13 @@ class AppLocalizations {
       ? 'Cada bloque representa 1 ms de CPU.'
       : 'Each block represents 1 ms of CPU time.';
 
+  String get metricsTitle => isSpanish ? 'Metricas' : 'Metrics';
+
+  String get totalTimeLabel => isSpanish ? 'Tiempo total' : 'Total time';
+
+  String get averageWaitingTimeLabel =>
+      isSpanish ? 'Espera promedio' : 'Average waiting';
+
   String get validProcessesPrefix =>
       isSpanish ? 'Procesos validos' : 'Valid processes';
 

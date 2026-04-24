@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cpu_flow_simulator/core/theme/app_theme.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/process.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/schedule_slice.dart';
+import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/simulation_result.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/use_cases/order_by_fifo_use_case.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/use_cases/order_by_round_robin_use_case.dart';
 import 'package:cpu_flow_simulator/features/cpu_flow/domain/use_cases/order_by_sjf_use_case.dart';
@@ -29,6 +30,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
 
   List<Process> processes = <Process>[];
   List<ScheduleSlice> slices = <ScheduleSlice>[];
+  SimulationResult? simulationResult;
 
   final _fifoUseCase = OrderByFifoUseCase();
   final _sjfUseCase = OrderBySjfUseCase();
@@ -52,12 +54,14 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
           final result = _fifoUseCase.call(processes);
           setState(() {
             slices = result.slices;
+            simulationResult = result;
           });
           break;
         case _SchedulingAlgorithm.sjf:
           final result = _sjfUseCase.call(processes);
           setState(() {
             slices = result.slices;
+            simulationResult = result;
           });
           break;
         case _SchedulingAlgorithm.roundRobin:
@@ -71,6 +75,7 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
           final result = _roundRobinUseCase.call(processes, quantum);
           setState(() {
             slices = result.slices;
+            simulationResult = result;
           });
           break;
       }
@@ -202,6 +207,10 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
                   const SizedBox(height: 14),
                   const Divider(color: AppTheme.divider, height: 1),
                   const SizedBox(height: 14),
+                  if (simulationResult != null) ...[
+                    _buildMetricsSummary(simulationResult!, l10n),
+                    const SizedBox(height: 14),
+                  ],
                   Expanded(
                     child: SliceQueueTable(
                       slices: slices,
@@ -323,6 +332,71 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
               width: 1.5,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricsSummary(SimulationResult result, AppLocalizations l10n) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.roundedCornerRadius),
+        border: Border.all(color: AppTheme.selectorBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.metricsTitle,
+            style: const TextStyle(
+              color: AppTheme.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildMetricChip(
+                label: l10n.totalTimeLabel,
+                value: '${result.totalTime} ms',
+              ),
+              _buildMetricChip(
+                label: l10n.averageWaitingTimeLabel,
+                value: '${result.averageWaitingTime.toStringAsFixed(2)} ms',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetricChip({required String label, required String value}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.inputFill,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: RichText(
+        text: TextSpan(
+          style: const TextStyle(color: AppTheme.textSecondary, fontSize: 13),
+          children: [
+            TextSpan(text: '$label: '),
+            TextSpan(
+              text: value,
+              style: const TextStyle(
+                color: AppTheme.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
         ),
       ),
     );
