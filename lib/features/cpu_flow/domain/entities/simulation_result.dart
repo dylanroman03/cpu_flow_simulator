@@ -11,4 +11,9 @@ class SimulationResult {
     required this.averageWaitingTime,
   }) : assert(totalTime >= 0),
        assert(averageWaitingTime >= 0);
+
+  const SimulationResult.empty()
+    : slices = const <ScheduleSlice>[],
+      totalTime = 0,
+      averageWaitingTime = 0;
 }

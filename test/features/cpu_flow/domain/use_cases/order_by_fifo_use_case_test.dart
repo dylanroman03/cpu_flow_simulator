@@ -4,6 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('OrderByFifoUseCase', () {
+    test('retorna resultado vacio cuando no hay procesos', () {
+      final useCase = OrderByFifoUseCase();
+
+      final result = useCase.call(const <Process>[]);
+
+      expect(result.slices, isEmpty);
+      expect(result.totalTime, 0);
+      expect(result.averageWaitingTime, 0);
+    });
+
     test('genera el timeline FIFO esperado con los datos del ejemplo', () {
       final useCase = OrderByFifoUseCase();
 

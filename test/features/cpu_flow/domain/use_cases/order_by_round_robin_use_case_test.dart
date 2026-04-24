@@ -4,6 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('OrderByRoundRobinUseCase', () {
+    test('retorna resultado vacio cuando no hay procesos', () {
+      final useCase = OrderByRoundRobinUseCase();
+
+      final result = useCase.call(const <Process>[], 3);
+
+      expect(result.slices, isEmpty);
+      expect(result.totalTime, 0);
+      expect(result.averageWaitingTime, 0);
+    });
+
     test('genera el timeline esperado con los datos del ejemplo (q=3)', () {
       final useCase = OrderByRoundRobinUseCase();
       const quantum = 3;

@@ -5,6 +5,10 @@ import 'package:cpu_flow_simulator/features/cpu_flow/domain/entities/simulation_
 
 class OrderBySjfUseCase {
   SimulationResult call(List<Process> processes) {
+    if (processes.isEmpty) {
+      return const SimulationResult.empty();
+    }
+
     List<Process> sortedProcess = List<Process>.from(processes)
       ..sort((a, b) => a.arriveTime.compareTo(b.arriveTime));
 

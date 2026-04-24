@@ -12,6 +12,10 @@ class OrderByRoundRobinUseCase {
       throw ArgumentError.value(quantum, 'quantum', 'must be greater than 0');
     }
 
+    if (processes.isEmpty) {
+      return const SimulationResult.empty();
+    }
+
     List<ProcessRuntime> pending =
         processes.map((process) => ProcessRuntime.fromProcess(process)).toList()
           ..sort((a, b) => a.arriveTime.compareTo(b.arriveTime));

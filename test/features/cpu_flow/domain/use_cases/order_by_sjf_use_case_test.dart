@@ -4,6 +4,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('OrderBySjfUseCase', () {
+    test('retorna resultado vacio cuando no hay procesos', () {
+      final useCase = OrderBySjfUseCase();
+
+      final result = useCase(const <Process>[]);
+
+      expect(result.slices, isEmpty);
+      expect(result.totalTime, 0);
+      expect(result.averageWaitingTime, 0);
+    });
+
     test('debe ordenar por SJF no expropiativo con los datos del ejemplo', () {
       final useCase = OrderBySjfUseCase();
 

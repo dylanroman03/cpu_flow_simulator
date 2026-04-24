@@ -41,10 +41,12 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
   _SchedulingAlgorithm _selectedAlgorithm = _SchedulingAlgorithm.roundRobin;
 
   void _runSimulation() {
+    final l10n = context.l10n;
+
     if (processes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Agrega al menos un proceso valido.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.noProcessesSnack)));
       return;
     }
 
@@ -67,9 +69,9 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
         case _SchedulingAlgorithm.roundRobin:
           final int quantum = int.tryParse(_quantumController.text) ?? 0;
           if (quantum <= 0) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('El quantum debe ser mayor a 0.')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l10n.quantumInvalidSnack)));
             return;
           }
           final result = _roundRobinUseCase.call(processes, quantum);
@@ -81,11 +83,9 @@ class _CpuFlowScreenState extends State<CpuFlowScreen> {
       }
     } catch (_) {
       log("error _");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No se pudo ejecutar la simulacion con estos datos.'),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.simulationErrorSnack)));
     }
   }
 
