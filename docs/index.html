@@ -131,6 +131,47 @@
   </div>
   <script>
     (function () {
+      let loadingScreenHidden = false;
+
+      function hideLoadingScreen() {
+        if (loadingScreenHidden) {
+          return;
+        }
+
+        loadingScreenHidden = true;
+        document.documentElement.classList.add('flutter-ready');
+        window.setTimeout(function () {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.remove();
+          }
+        }, 220);
+      }
+
+      function hasFlutterContent() {
+        return Boolean(
+          document.querySelector('flt-glass-pane') ||
+          document.querySelector('flutter-view') ||
+          document.querySelector('flt-scene-host')
+        );
+      }
+
+      function waitForFlutterContent() {
+        if (hasFlutterContent()) {
+          requestAnimationFrame(function () {
+            requestAnimationFrame(hideLoadingScreen);
+          });
+          return;
+        }
+
+        requestAnimationFrame(waitForFlutterContent);
+      }
+
+      window.addEventListener('load', waitForFlutterContent);
+      window.setTimeout(hideLoadingScreen, 30000);
+    })();
+
+    (function () {
       const loaderColors = {
         track: '#f6dcc7',
         primary: '#c66a2b',
@@ -162,17 +203,6 @@
     })();
   </script>
   <script src="flutter_bootstrap.js" async></script>
-  <script>
-    document.addEventListener('dart-app-ready', function () {
-      document.documentElement.classList.add('flutter-ready');
-      window.setTimeout(function () {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-          loadingScreen.remove();
-        }
-      }, 220);
-    });
-  </script>
 </body>
 
 </html>
